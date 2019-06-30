@@ -17,11 +17,13 @@ class GlowCircleView @JvmOverloads constructor(context: Context, attrs: Attribut
 
 
     companion object {
-        const val GLOW_STRIKE_WIDTH = 6f
+        const val GLOW_STRIKE_WIDTH = 8f
         const val COLOR_GLOW_ORANGE = 0xffFF9933.toInt()
         const val COLOR_GLOW_PINK = 0xffff3366.toInt()
+        const val ROTATION_INCREMENT = 2f
     }
 
+    private var rotate = 45f
     private val paint = Paint()
     @SuppressLint("DrawAllocation")
     override fun onDraw(canvas: Canvas?) {
@@ -29,6 +31,7 @@ class GlowCircleView @JvmOverloads constructor(context: Context, attrs: Attribut
             super.onDraw(canvas)
             return
         }
+        //Disable Hardware Acceleration will cause onDraw infinitely called
         setLayerType(View.LAYER_TYPE_SOFTWARE, null)
         val bitmapDrawable = drawable as BitmapDrawable?
         val bitmap = bitmapDrawable?.bitmap
@@ -54,7 +57,8 @@ class GlowCircleView @JvmOverloads constructor(context: Context, attrs: Attribut
         paint.style = Paint.Style.STROKE
         paint.strokeWidth = GLOW_STRIKE_WIDTH
         paint.color = COLOR_GLOW_PINK
-        canvas?.rotate(45f, cx, cy)
+        rotate += ROTATION_INCREMENT
+        canvas?.rotate(rotate, cx, cy)
         paint.shader = LinearGradient(0f, cy, cx * 2 / 3, cy, COLOR_GLOW_ORANGE, COLOR_GLOW_PINK, Shader.TileMode.CLAMP)
 
         // the stroke is drawn along the side of the circle, so if we don't want the stroke out of the bound, we need to minus the radius by GLOW_STRIKE_WIDTH
