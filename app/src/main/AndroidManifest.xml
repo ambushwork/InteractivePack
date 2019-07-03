@@ -19,6 +19,7 @@
             </intent-filter>
         </activity>
         <activity android:name=".coordinator.CoordinatorCompActivity"/>
+        <activity android:name=".vectoranimation.VectorActivity"/>
     </application>
 
 </manifest>
