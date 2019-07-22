@@ -6,6 +6,8 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.netatmo.ylu.interactivepack.coordinator.CardData
 import com.netatmo.ylu.interactivepack.coordinator.CoordinatorCompActivity
+import com.netatmo.ylu.interactivepack.glowingview.GlowingView
+import com.netatmo.ylu.interactivepack.glowingview.GlowingViewActivity
 import com.netatmo.ylu.interactivepack.matrix.MatrixActivity
 import com.netatmo.ylu.interactivepack.vectoranimation.VectorActivity
 import kotlinx.android.synthetic.main.activity_main.*
@@ -33,6 +35,8 @@ class MainActivity : AppCompatActivity() {
         list.add(CardData("Vector Animation Demo", intent2))
         val intent3 = Intent(this, MatrixActivity::class.java)
         list.add(CardData("Matrix Demo", intent3))
+        val intent4 = Intent(this, GlowingViewActivity::class.java)
+        list.add(CardData("Glowing View", intent4))
         return list
     }
 }
