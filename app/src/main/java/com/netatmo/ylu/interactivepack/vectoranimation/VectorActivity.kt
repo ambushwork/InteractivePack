@@ -4,10 +4,13 @@ import android.os.Bundle
 import android.os.PersistableBundle
 import androidx.appcompat.app.AppCompatActivity
 import com.netatmo.ylu.interactivepack.R
+import kotlinx.android.synthetic.main.demo_activity_vector_layout.*
 
 class VectorActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.demo_activity_vector_layout)
+        security_view.setImageResource(R.drawable.ic_security)
+
     }
 }

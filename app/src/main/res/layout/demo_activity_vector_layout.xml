@@ -3,9 +3,21 @@
              android:orientation="vertical"
              android:layout_width="match_parent"
              android:layout_height="match_parent">
-    <com.netatmo.ylu.interactivepack.vectoranimation.SecurityView
+    <!--
+        <com.netatmo.ylu.interactivepack.vectoranimation.SecurityView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"/>
+    -->
+    <com.netatmo.ylu.interactivepack.vectoranimation.SecurityScanView
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"/>
+            android:layout_gravity="center"
+            android:id="@+id/security_view"
+            android:layout_height="wrap_content"/>
 
+    <ProgressBar android:layout_width="wrap_content"
+                 android:layout_height="wrap_content"
+                 android:id="@+id/progress_bar"
+                 android:layout_gravity="top|center_horizontal"
+                 android:indeterminateTint="@android:color/holo_orange_dark"/>
 </FrameLayout>
