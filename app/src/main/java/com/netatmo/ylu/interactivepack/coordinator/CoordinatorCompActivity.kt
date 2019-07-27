@@ -26,7 +26,9 @@ class CoordinatorCompActivity : AppCompatActivity() {
         setContentView(R.layout.demo_activity_coordinator_layout)
 
         recyclerView = findViewById(R.id.recycler_view)
-        recyclerView?.adapter = ContentAdapter()
+        val adapter = ContentAdapter()
+        adapter.setActivity(this)
+        recyclerView?.adapter = adapter
         recyclerView?.layoutManager = linearLayoutManager
         recyclerView?.setHasFixedSize(true)
         recyclerView?.addOnScrollListener(object : RecyclerView.OnScrollListener() {
