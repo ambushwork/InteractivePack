@@ -22,6 +22,8 @@
         <activity android:name=".vectoranimation.VectorActivity"/>
         <activity android:name=".matrix.MatrixActivity"/>
         <activity android:name=".glowingview.GlowingViewActivity"/>
+        <activity android:name=".coordinator.PersonDetailActivity"
+                  android:theme="@style/MyDialog"/>
     </application>
 
 </manifest>

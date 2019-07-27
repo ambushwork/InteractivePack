@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.Window
 import android.widget.ImageView
 import androidx.fragment.app.DialogFragment
 import com.netatmo.ylu.interactivepack.R
@@ -23,7 +24,6 @@ class PersonDialogFragment() : DialogFragment() {
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-
         return inflater.inflate(R.layout.demo_dialog_person_detail, container, false)
     }
 
