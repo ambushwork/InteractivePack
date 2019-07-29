@@ -8,6 +8,7 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 import com.netatmo.ylu.interactivepack.R;
+import com.netatmo.ylu.interactivepack.Utils;
 import com.squareup.picasso.Picasso;
 
 public class ContentAdapter extends RecyclerView.Adapter<ContentAdapter.FeedHolder> {
@@ -39,7 +40,7 @@ public class ContentAdapter extends RecyclerView.Adapter<ContentAdapter.FeedHold
     }
 
     private String getContentUrl(int position) {
-        return String.format("https://picsum.photos/id/%s/1920/1080", String.valueOf(position));
+        return Utils.Companion.getRandomLargePic(position);
     }
 
     @Override
