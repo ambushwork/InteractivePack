@@ -1,4 +1,4 @@
-package com.netatmo.ylu.interactivepack.vectoranimation;
+package com.netatmo.ylu.interactivepack.matrix;
 
 import android.content.Context;
 import android.graphics.*;

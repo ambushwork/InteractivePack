@@ -2,11 +2,16 @@
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
              android:orientation="vertical"
              android:layout_width="match_parent"
-             android:layout_height="match_parent">
-    <com.netatmo.ylu.interactivepack.vectoranimation.CropImageViewZoom
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+        android:layout_height="match_parent"
+        android:background="@android:color/darker_gray">
+
+    <com.netatmo.ylu.interactivepack.matrix.CropImageViewZoom
+            android:layout_gravity="center"
+            android:background="@android:color/black"
+            android:layout_width="300dp"
+            android:layout_height="400dp"
             android:src="@drawable/my_image"
-            android:id="@+id/image_view"/>
+            android:scaleType="matrix"
+            android:id="@+id/image_view" />
 
 </FrameLayout>
