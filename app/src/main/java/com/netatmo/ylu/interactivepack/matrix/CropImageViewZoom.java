@@ -1,22 +1,25 @@
 package com.netatmo.ylu.interactivepack.matrix;
 
 import android.content.Context;
-import android.graphics.*;
+import android.graphics.Matrix;
+import android.graphics.PointF;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
+
+import androidx.annotation.NonNull;
 import androidx.appcompat.widget.AppCompatImageView;
-import com.netatmo.ylu.interactivepack.R;
 
 public class CropImageViewZoom extends AppCompatImageView {
-    private final Matrix matrix = new Matrix();
-    private final Matrix currentMatrix = new Matrix();
-    private Bitmap bitmap;
-    private float oldLength;
-    private final PointF midPoint = new PointF();
+    /**
+     * The downMatrix save the matrix data when receive action down.
+     */
+    private final Matrix downMatrix = new Matrix();
+    private float downPointerDistance;
+    private PointF downCenterPoint = new PointF();
     private boolean isMorePoint;
     private float downX;
     private float downY;
-    private double oldRotate;
+    private double downPointerAngle;
 
 
     public CropImageViewZoom(Context context) {
@@ -31,75 +34,82 @@ public class CropImageViewZoom extends AppCompatImageView {
 
     public CropImageViewZoom(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
-        this.init();
-    }
-
-    private void init() {
-        bitmap = BitmapFactory.decodeResource(this.getResources(), R.drawable.my_image);
-    }
-
-    @Override
-    protected void onDraw(Canvas canvas) {
-        canvas.save();
-        canvas.drawBitmap(bitmap, matrix, null);
-        canvas.restore();
     }
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
+        Matrix matrix = this.getImageMatrix();
         switch (event.getAction() & MotionEvent.ACTION_MASK) {
             case MotionEvent.ACTION_DOWN:
                 downX = event.getX();
                 downY = event.getY();
-                currentMatrix.set(matrix);
+                downMatrix.set(matrix);
                 isMorePoint = false;
                 break;
             case MotionEvent.ACTION_POINTER_DOWN:
                 isMorePoint = true;
-                currentMatrix.set(matrix);
-                oldLength = this.getLength(event);
-                oldRotate = this.getRotate(event);
-                this.getMidPoint(midPoint, event);
+                downMatrix.set(matrix);
+                downPointerDistance = this.getDistance(event);
+                downPointerAngle = this.getHorizontalAngle(event);
+                downCenterPoint = this.getCenterPoint(event);
                 break;
             case MotionEvent.ACTION_MOVE:
                 if (isMorePoint) {
-                    matrix.set(currentMatrix);
-                    double rotate = this.getRotate(event) - oldRotate;
-
-                    matrix.setRotate((float) rotate, midPoint.x, midPoint.y);
-                    float length = this.getLength(event) / oldLength;
-                    matrix.postScale(length, length, midPoint.x, midPoint.y);
-
+                    //Multi finger gesture
+                    matrix.set(downMatrix);
+                    //rotate
+                    double rotate = this.getHorizontalAngle(event) - downPointerAngle;
+                    matrix.postRotate((float) rotate, downCenterPoint.x, downCenterPoint.y);
+                    //scale
+                    float scale = this.getDistance(event) / downPointerDistance;
+                    matrix.postScale(scale, scale, downCenterPoint.x, downCenterPoint.y);
+                    //transition
+                    PointF centerPoint = this.getCenterPoint(event);
+                    float deltaX = centerPoint.x - downCenterPoint.x;
+                    float deltaY = centerPoint.y - downCenterPoint.y;
+                    matrix.postTranslate(deltaX, deltaY);
                 } else {
-                    matrix.set(currentMatrix);
-                    float x = event.getX() - downX;
-                    float y = event.getY() - downY;
-                    matrix.postTranslate(x, y);
+                    //Transition(the single finger drag case)
+                    //The position diff calculation below is based on the ACTION_DOWN,
+                    // so the matrix we base on must be the one which is saved from ACTION_DOWN
+                    matrix.set(downMatrix);
+                    float deltaX = event.getX() - downX;
+                    float deltaY = event.getY() - downY;
+                    matrix.postTranslate(deltaX, deltaY);
                 }
-
-                this.invalidate();
                 break;
             case MotionEvent.ACTION_POINTER_UP:
-                isMorePoint = false;
+                if (event.getPointerCount() <= 2) {
+                    downMatrix.set(matrix);
+                    isMorePoint = false;
+                    int indexUp = event.getActionIndex();
+                    for (int i = 0; i < event.getPointerCount(); i++) {
+                        if (indexUp != i) {
+                            //save the position the finger staying as the pivot
+                            downX = event.getX(i);
+                            downY = event.getY(i);
+                        }
+                    }
+                }
                 break;
             case MotionEvent.ACTION_UP:
                 break;
             default:
                 break;
         }
+        this.setImageMatrix(matrix);
+        this.invalidate();
         return true;
     }
 
-    /**
-     * 取手势中心点
-     */
-    private void getMidPoint(PointF point, MotionEvent event) {
+    @NonNull
+    private PointF getCenterPoint(@NonNull MotionEvent event) {
         float x = event.getX(0) + event.getX(1);
         float y = event.getY(0) + event.getY(1);
-        point.set(x / 2, y / 2);
+        return new PointF(x / 2, y / 2);
     }
 
-    private float getLength(MotionEvent event) {
+    private float getDistance(MotionEvent event) {
         float pointX1 = event.getX(0);
         float pointX2 = event.getX(1);
         float pointY1 = event.getY(0);
@@ -108,7 +118,13 @@ public class CropImageViewZoom extends AppCompatImageView {
         return (float) Math.sqrt(Math.pow(pointX1 - pointX2, 2) + Math.pow(pointY1 - pointY2, 2));
     }
 
-    private double getRotate(MotionEvent event) {
+    /**
+     * Get the angle of the pointer from horizontal axis
+     *
+     * @param event the motion event
+     * @return the angle (degree)
+     */
+    private double getHorizontalAngle(MotionEvent event) {
         float pointX1 = event.getX(0);
         float pointX2 = event.getX(1);
         float pointY1 = event.getY(0);
