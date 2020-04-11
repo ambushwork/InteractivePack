@@ -9,6 +9,8 @@ import android.view.MotionEvent;
 import androidx.annotation.NonNull;
 import androidx.appcompat.widget.AppCompatImageView;
 
+import java.util.Arrays;
+
 public class CropImageViewZoom extends AppCompatImageView {
     /**
      * The downMatrix save the matrix data when receive action down.
@@ -20,6 +22,10 @@ public class CropImageViewZoom extends AppCompatImageView {
     private float downX;
     private float downY;
     private double downPointerAngle;
+    private final boolean isRotateEnable = false;
+    private final boolean isTransitionEnable = true;
+    private final boolean isScaleEnable = true;
+    private final float[] points = new float[4];
 
 
     public CropImageViewZoom(Context context) {
@@ -37,8 +43,17 @@ public class CropImageViewZoom extends AppCompatImageView {
     }
 
     @Override
+    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+        super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+        points[2] = this.getMeasuredWidth();
+        points[3] = this.getMeasuredHeight();
+    }
+
+    @Override
     public boolean onTouchEvent(MotionEvent event) {
-        Matrix matrix = this.getImageMatrix();
+        //copy current image matrix
+        Matrix matrix = new Matrix();
+        matrix.set(this.getImageMatrix());
         switch (event.getAction() & MotionEvent.ACTION_MASK) {
             case MotionEvent.ACTION_DOWN:
                 downX = event.getX();
@@ -58,24 +73,34 @@ public class CropImageViewZoom extends AppCompatImageView {
                     //Multi finger gesture
                     matrix.set(downMatrix);
                     //rotate
-                    double rotate = this.getHorizontalAngle(event) - downPointerAngle;
-                    matrix.postRotate((float) rotate, downCenterPoint.x, downCenterPoint.y);
+                    if (isRotateEnable) {
+                        double rotate = this.getHorizontalAngle(event) - downPointerAngle;
+                        matrix.postRotate((float) rotate, downCenterPoint.x, downCenterPoint.y);
+                    }
                     //scale
-                    float scale = this.getDistance(event) / downPointerDistance;
-                    matrix.postScale(scale, scale, downCenterPoint.x, downCenterPoint.y);
+                    if (isScaleEnable) {
+                        float scale = this.getDistance(event) / downPointerDistance;
+                        matrix.postScale(scale, scale, downCenterPoint.x, downCenterPoint.y);
+                    }
                     //transition
-                    PointF centerPoint = this.getCenterPoint(event);
-                    float deltaX = centerPoint.x - downCenterPoint.x;
-                    float deltaY = centerPoint.y - downCenterPoint.y;
-                    matrix.postTranslate(deltaX, deltaY);
+                    if (isTransitionEnable) {
+                        PointF centerPoint = this.getCenterPoint(event);
+                        float deltaX = centerPoint.x - downCenterPoint.x;
+                        float deltaY = centerPoint.y - downCenterPoint.y;
+                        matrix.postTranslate(deltaX, deltaY);
+                    }
+
                 } else {
                     //Transition(the single finger drag case)
                     //The position diff calculation below is based on the ACTION_DOWN,
                     // so the matrix we base on must be the one which is saved from ACTION_DOWN
                     matrix.set(downMatrix);
-                    float deltaX = event.getX() - downX;
-                    float deltaY = event.getY() - downY;
-                    matrix.postTranslate(deltaX, deltaY);
+                    if (isTransitionEnable) {
+                        float deltaX = event.getX() - downX;
+                        float deltaY = event.getY() - downY;
+                        matrix.postTranslate(deltaX, deltaY);
+                    }
+
                 }
                 break;
             case MotionEvent.ACTION_POINTER_UP:
@@ -97,9 +122,22 @@ public class CropImageViewZoom extends AppCompatImageView {
             default:
                 break;
         }
-        this.setImageMatrix(matrix);
-        this.invalidate();
+        if (!this.isMatrixOutRange(matrix)) {
+            this.setImageMatrix(matrix);
+            this.invalidate();
+        }
         return true;
+    }
+
+    private boolean isMatrixOutRange(@NonNull Matrix matrix) {
+        //Log.e("Previous point", String.format("left %f, top %f, right %f, bottom %f", points[0], points[1], points[2], points[3]));
+        float[] nextPoints = Arrays.copyOf(points, points.length);
+        matrix.mapPoints(nextPoints);
+        //Log.e("Next point", String.format("left %f, top %f, right %f, bottom %f", nextPoints[0], nextPoints[1], nextPoints[2], nextPoints[3]));
+        if (nextPoints[0] > 0 || nextPoints[1] > 0 || nextPoints[2] < this.getWidth() || nextPoints[3] < this.getHeight()) {
+            return true;
+        }
+        return false;
     }
 
     @NonNull
